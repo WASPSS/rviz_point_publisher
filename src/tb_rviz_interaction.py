@@ -128,7 +128,7 @@ def click_cb(data):
 def start():
     global goal_pub, poseArray_pub
     #Initialize the ROS Node for this functionality
-    rospy.init_node('rviz_input_test')
+    rospy.init_node('tb_rviz_interaction')
     #Initialize publisher to publish Marker array to display on RViz
     goal_pub = rospy.Publisher("/goal_markers", MarkerArray, queue_size = 1)
     #Initialize publisher to publish PoseArray with list of goals to tb_path_publisher

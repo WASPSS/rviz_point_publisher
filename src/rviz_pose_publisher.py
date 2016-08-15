@@ -19,6 +19,7 @@ goals = []
 completed_goals = []
 
 # Clear markers from the map
+# More info about Markers and MarkerArrays here: http://docs.ros.org/kinetic/api/visualization_msgs/html/msg/MarkerArray.html
 def clear_map():
     #create a new Marker Array
     newMarkerArray = MarkerArray()
@@ -66,7 +67,7 @@ def update_markers(goals, complete_goals, publisher):
     #Publish the Message to RViz
     publisher.publish(newMarkerArray)
 
-#This function will update the list of goals that should be published to package 2
+#This function will update the list of goals that should be published to tb_path_publisher
 def update_pose_list(goals,publisher):
     i = 0
     #Create an object to new pose array
@@ -82,11 +83,11 @@ def update_pose_list(goals,publisher):
             newPoseArray.poses[i].position.x = goal[0]
             newPoseArray.poses[i].position.y = goal[1]
             i = i+1
-        #Publish the new list to the Package 2 to move the robot. 
+        #Publish the new list to the tb_path_publisher to move the robot.
         publisher.publish(newPoseArray)
 
 # This Callback function will be called everytime a goal is reached.
-# Package 2 will publish the index of point in goal list
+# tb_path_publisher will publish the index of point in goal list
 def completed_cb(data):
     global goals, completed_goals
     #Index of goal acheived
@@ -101,9 +102,11 @@ def completed_cb(data):
         clear_map()
         #Update Markers on RViz
         update_markers(goals, completed_goals, goal_pub)
-        #Update the list of goals to be published to Package 2
+        #Update the list of goals to be published to tb_path_publisher
         update_pose_list(goals, poseArray_pub)
     else:
+        # If this is printed than there is a problem in tb_path_publisher;
+        # it is publishing element index out of range..
         print("OUT OF RANGE")
 
 # This Callback function will called everytime a point is placed on RViz
@@ -119,7 +122,7 @@ def click_cb(data):
     clear_map()
     #Update the markes to display on RViz
     update_markers(goals, completed_goals, goal_pub)
-    #Update the list of goals that should be published to Package 2
+    #Update the list of goals that should be published to tb_path_publisher
     update_pose_list(goals, poseArray_pub)
 
 def start():
@@ -128,17 +131,17 @@ def start():
     rospy.init_node('rviz_input_test')
     #Initialize publisher to publish Marker array to display on RViz
     goal_pub = rospy.Publisher("/goal_markers", MarkerArray, queue_size = 1)
-    #Initialize publisher to publish PoseArray with list of goals to package 2
+    #Initialize publisher to publish PoseArray with list of goals to tb_path_publisher
     poseArray_pub = rospy.Publisher("/list_of_goals", PoseArray, queue_size = 1)
     #subscribe to receive the points clicked in RViz
     rospy.Subscriber("/clicked_point", PointStamped, click_cb)
-    #Subscribe to message published from Package 2 about the goal accomplished
+    #Subscribe to message published from tb_path_publisher about the goal accomplished
     rospy.Subscriber("/goal_completed", Int16, completed_cb)
     #Sleep for a while to let all nodes Initialize
     time.sleep(.300)
     #Clear the map
     clear_map()
-    #This keeps the Node active till it is killed
+    #This keeps the  active till it is killed
     rospy.spin()
 
 if __name__ == '__main__':

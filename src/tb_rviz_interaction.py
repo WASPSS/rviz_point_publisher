@@ -34,7 +34,7 @@ def clear_map():
 
 # Update the marker list with goals completed and finished and publish to RViz
 # for vizulaization.
-def update_markers(goals, complete_goals, publisher):
+def update_markers(goals, complete_goals):
     newMarkerArray = MarkerArray()
     i = 0
     #Loop twice, for goals and completed goals
@@ -65,10 +65,10 @@ def update_markers(goals, complete_goals, publisher):
             newMarkerArray.markers[i].pose.position.y = goal[1]
             i = i+1
     #Publish the Message to RViz
-    publisher.publish(newMarkerArray)
+    goal_pub.publish(newMarkerArray)
 
 #This function will update the list of goals that should be published to tb_path_publisher
-def update_pose_list(goals,publisher):
+def update_pose_list(goals):
     i = 0
     #Create an object to new pose array
     newPoseArray = PoseArray()
@@ -84,7 +84,7 @@ def update_pose_list(goals,publisher):
             newPoseArray.poses[i].position.y = goal[1]
             i = i+1
         #Publish the new list to the tb_path_publisher to move the robot.
-        publisher.publish(newPoseArray)
+        poseArray_pub.publish(newPoseArray)
 
 # This Callback function will be called everytime a goal is reached.
 # tb_path_publisher will publish the index of point in goal list
@@ -101,9 +101,9 @@ def completed_cb(data):
         #Clear the map
         clear_map()
         #Update Markers on RViz
-        update_markers(goals, completed_goals, goal_pub)
+        update_markers(goals, completed_goals)
         #Update the list of goals to be published to tb_path_publisher
-        update_pose_list(goals, poseArray_pub)
+        update_pose_list(goals)
     else:
         # If this is printed than there is a problem in tb_path_publisher;
         # it is publishing element index out of range..
@@ -121,9 +121,9 @@ def click_cb(data):
     #Clear the map
     clear_map()
     #Update the markes to display on RViz
-    update_markers(goals, completed_goals, goal_pub)
+    update_markers(goals, completed_goals)
     #Update the list of goals that should be published to tb_path_publisher
-    update_pose_list(goals, poseArray_pub)
+    update_pose_list(goals)
 
 def start():
     global goal_pub, poseArray_pub
